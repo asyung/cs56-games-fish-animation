@@ -21,7 +21,9 @@ import java.net.*;
    @author Mathew Glodack
    @author Jenna Cryan
    @author Josephine Vo
-   @version for CS56, Winter 2014, UCSB
+   @author Shadee Barzin
+   @author Michele Haque
+   @version for CS56, Winter 2015, UCSB
 */
 
 public class FishAnimationEnvironment extends JFrame implements Serializable {
@@ -160,11 +162,17 @@ public class FishAnimationEnvironment extends JFrame implements Serializable {
 	}
 
 	animation.getContentPane().add(BorderLayout.CENTER, fishPanel);
+	// begin animation
 	animate = new Animate();
 	animate.start();
-	animation.setDefaultCloseOperation(EXIT_ON_CLOSE);    
+
+	// Set game frame characteristics
 	animation.setSize(maxX, maxY);
+	animation.setDefaultCloseOperation(EXIT_ON_CLOSE);    
+	// Place game frame in center of screen
+	animation.setLocationRelativeTo(null);
 	animation.setVisible(true);
+
 	GameMenu game = new GameMenu();
 	game.makemenu();
     }//end constructor
@@ -177,6 +185,9 @@ public class FishAnimationEnvironment extends JFrame implements Serializable {
     */
 
     class DrawingPanel extends JPanel {
+    
+    	boolean buttonAdded = false;
+    	JButton playAgain;
     
 	public void paintComponent(Graphics g){ 
 	    
@@ -201,7 +212,8 @@ public class FishAnimationEnvironment extends JFrame implements Serializable {
 	    Image seaweed = new ImageIcon(seaweedURL).getImage();
 	    URL boatURL = getClass().getResource("/resources/cartoon-boat.jpg");
 	    Image boat = new ImageIcon(boatURL).getImage();
-	    
+	    URL jellyfishURL = getClass().getResource("/resources/jellyfish.jpg");
+	    Image jellyfishImg = new ImageIcon(jellyfishURL).getImage();
 	    
 	    //Draws the seaweed at the specified points
 	    for (int i = 0; i < this.getWidth() + 125; i += 125) {
@@ -257,10 +269,9 @@ public class FishAnimationEnvironment extends JFrame implements Serializable {
 	    for(int i = 0; i < jellyfish.size(); i++) {
 	    	int jNewXPos = (int) jellyfish.get(i).getXPos();
 		int jNewYPos = (int) jellyfish.get(i).getYPos();
-		if(jellyfish.get(i).CheckJellyFish() == true) {
+		if(jellyfish.get(i).CheckJellyFish() == true) {		    
 		    //Draws the Body of the JellyFish
 		    g2.fillArc(jNewXPos, jNewYPos, 50, 40, 0, 180);
-
 		    //Draws the Tentacles of the JellyFish
      		    for(int j = (int) jellyfish.get(i).getXPos()+5; j < jellyfish.get(i).getXPos() + 50; j += 5){
 			g2.drawLine(j, jNewYPos + 75, j, jNewYPos + 10);
@@ -268,44 +279,74 @@ public class FishAnimationEnvironment extends JFrame implements Serializable {
 		}
 		else {
 		    //Draws the Body of the JellyFish
-		    g2.fillArc(jNewXPos + 5, jNewYPos, 40, 50, 0, 180); 
-		    
+		    g2.fillArc(jNewXPos + 5, jNewYPos, 40, 50, 0, 180); 		    
 		    //Draws the Tentacles of the JellyFish
 		    for(int j = (int) jellyfish.get(i).getXPos() + 10; j < jellyfish.get(i).getXPos() + 45; j += 5){
 			g2.drawLine(j,jNewYPos+95,j,jNewYPos+10);
 		    }
 		}	    
-	    }		
+	    }	
 	    
 	    //displays the number of points
 	    g.setFont(new Font("Corsiva Hebrew", Font.PLAIN, 40));
-	    g.setColor(Color.RED);
+	    g.setColor(new Color(0xD4FFFF));
 	    String str1 = "Points: " + eaten + "!";
 	    g.drawString(str1, 0, 35);
 	    
 	    //displays the current elapsed time of the game in seconds
 	    g.setFont(new Font("Corsiva Hebrew", Font.PLAIN, 30));
-	    g.setColor(Color.RED);
+	    g.setColor(new Color(0xD4FFFF));
 	    String str2 = "Seconds Elapsed: " + timer;
 	    g.drawString(str2, 0, 65);
 
 	    if(eaten >= 50) {
 		stop = true;
 		g.setFont(new Font("Corsiva Hebrew", Font.PLAIN, 100));
-		g.setColor(Color.RED);
+		g.setColor(new Color(0xDAFFFF));
 		String win = "YOU WON!";
-		g.drawString(win, 350, 400);
+		if(!buttonAdded){
+			playAgain = new JButton("Play Again?");
+			playAgain.addActionListener(actionlistener);
+			playAgain.setSize(new Dimension(200,40));
+			playAgain.setLocation(575, 470);
+			this.add(playAgain);
+			buttonAdded = true;
+		}
+		g.drawString(win, 430, 300);
 	    }
 	    else if(eaten <= -25) {
 		stop = true;
 		g.setFont(new Font("Corsiva Hebrew", Font.PLAIN, 100));
-		g.setColor(Color.RED);
+		g.setColor(new Color(0xDAFFFF));
 		String lose = "Game Over!";
 		String lose2 = "Better luck next time!";
-		g.drawString(lose, 325, 250);
-		g.drawString(lose2, 140, 400);
-	    }   
+		// add a Play Again button
+		if(!buttonAdded){
+			playAgain = new JButton("Play Again?");
+			playAgain.addActionListener(actionlistener);
+			playAgain.setSize(new Dimension(200,40));
+			playAgain.setLocation(575, 470);
+			this.add(playAgain);
+			buttonAdded = true;
+		}
+		g.drawString(lose, 375, 250);
+		g.drawString(lose2, 150, 400);
+	     }   
 	}
+	// ActionListener that checks if the Play Again button was clicked	
+	ActionListener actionlistener = new ActionListener(){
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JButton b = (JButton) e.getSource();
+			if(b.equals(playAgain)){
+				Menu m = new Menu();
+				m.makegui();
+				animation.dispose();
+			}
+		}
+			
+	};
+
     } //end DrawingPanel
     
     /**
@@ -509,7 +550,9 @@ public class FishAnimationEnvironment extends JFrame implements Serializable {
     class GameMenu implements ActionListener {
 	JButton Pause;
 	URL pauseURL = getClass().getResource("/resources/PauseButton.jpg");
+	URL playURL = getClass().getResource("/resources/play.jpg");
 	ImageIcon pause = new ImageIcon(pauseURL);
+	ImageIcon play = new ImageIcon(playURL);
 	JButton Save = new JButton("Save & Exit");
 	JButton Exit = new JButton("Exit");
 	
@@ -545,10 +588,12 @@ public class FishAnimationEnvironment extends JFrame implements Serializable {
 	    if(event.getSource() == Pause) {
 		if(stop == false) {
 		    stop = true;
+		    Pause.setIcon(play);
 		    pausestart = System.nanoTime() / 1000000000;
 		}
 		else {
 		    stop = false;
+		    Pause.setIcon(pause);
 		    pausetime += (System.nanoTime() / 1000000000 - pausestart);
 		}
 	    }
